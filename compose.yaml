@@ -1,0 +1,33 @@
+services:
+  flask:
+    container_name: flask
+    build: .
+    # ports:
+    #   - 8000:8000
+    network_mode: host
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - ALLOWED_ORIGIN=${ALLOWED_ORIGIN:-""}
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY:-""}
+      - FLASK_SQLALCHEMY_DATABASE_URI=${FLASK_SQLALCHEMY_DATABASE_URI:-""}
+
+  postgres:
+    container_name: postgres
+    image: postgres:15-alpine
+    # ports:
+    #   - 5432:5432
+    network_mode: host
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 10s
+      retries: 15
+      start_period: 10s
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-""}
+      - POSTGRES_USER=${POSTGRES_USER:-""}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-""}
