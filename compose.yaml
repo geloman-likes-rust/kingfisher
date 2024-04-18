@@ -35,6 +35,7 @@ services:
   redis:
     container_name: redis
     image: redis:alpine3.19
+    command: ["redis-server", "--maxmemory", "50mb", "--maxmemory-policy", "volatile-lru"]
     ports:
       - 6379:6379
     restart: on-failure
