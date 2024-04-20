@@ -17,8 +17,8 @@ services:
       redis:
         condition: service_healthy
     environment:
+      - JWT_SECRET=${JWT_SECRET:-""}
       - ALLOWED_ORIGIN=${ALLOWED_ORIGIN:-""}
-      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY:-""}
       - FLASK_SQLALCHEMY_DATABASE_URI=${FLASK_SQLALCHEMY_DATABASE_URI:-""}
 
   postgres:
