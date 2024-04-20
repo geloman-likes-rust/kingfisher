@@ -1,4 +1,3 @@
-from flask_login import login_required
 from app.shared.orm import db
 from app.shared.hasher import bcrypt
 from flask import Blueprint, request
@@ -10,7 +9,6 @@ accounts = Blueprint("accounts", __name__, url_prefix="/api/v1")
 
 
 @accounts.post("/useradd")
-@login_required
 def create_user():
     payload = request.json
     if payload is None:
@@ -34,7 +32,6 @@ def create_user():
 
 
 @accounts.delete("/userdel")
-@login_required
 def delete_user():
     payload = request.json
     if payload is None:
@@ -55,7 +52,6 @@ def delete_user():
 
 
 @accounts.patch("/passwd")
-@login_required
 def change_password():
     payload = request.json
     if payload is None:

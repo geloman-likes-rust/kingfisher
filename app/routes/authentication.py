@@ -1,5 +1,4 @@
 from flask import Blueprint, request
-from flask_login import login_required, login_user, logout_user
 from app.shared.hasher import bcrypt
 from app.models.user import User
 
@@ -24,14 +23,14 @@ def login():
 
     password_did_match = bcrypt.check_password_hash(user.password, password)
     if password_did_match:
-        login_user(user)
+
+        # TODO: send both access token and refresh token as httpOnly cookie
+
         return "", 204  # 204 - NO CONTENT
 
     return "", 401  # 401 - UNAUTHORIZED
 
 
 @authentication.get("/logout")
-@login_required
 def logout():
-    logout_user()
     return "", 204  # 204 - NO CONTENT

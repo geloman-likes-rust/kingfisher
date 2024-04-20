@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-from flask_login import UserMixin
 from sqlalchemy.orm import Mapped, mapped_column
 from app.shared.orm import db
 
 
 @dataclass
-class User(db.Model, UserMixin):
+class User(db.Model):
 
     __tablename__ = "accounts"
 
