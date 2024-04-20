@@ -24,7 +24,7 @@ def create_user():
     user = User.query.filter_by(username=username).first()
     user_exist = user is not None
     if user_exist:
-        return {"error": "username is already taken!"}, 409  # 409 - CONFLICT
+        return {"error": "username has already been taken!"}, 409  # 409 - CONFLICT
 
     hashed_password = bcrypt.generate_password_hash(password).decode()
     db.session.add(User(username=username, password=hashed_password))
