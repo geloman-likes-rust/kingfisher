@@ -14,3 +14,4 @@ class User(db.Model):
     permission: Mapped[str] = mapped_column(default="read-only")
     role: Mapped[str] = mapped_column(default="user")
     is_online: Mapped[bool] = mapped_column(default=False)
+    token: Mapped[str] = mapped_column(nullable=True)
