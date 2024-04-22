@@ -1,6 +1,7 @@
 from app.shared.orm import db
 from app.shared.hasher import bcrypt
 from flask import Blueprint, request
+from sqlalchemy.exc import IntegrityError
 
 from app.models.user import User
 
@@ -19,16 +20,15 @@ def create_user():
     if username is None or password is None:
         return "", 400  # 400 - BAD REQUEST
 
-    user = User.query.filter_by(username=username).first()
-    user_exist = user is not None
-    if user_exist:
-        return {"error": "username has already been taken!"}, 409  # 409 - CONFLICT
-
     hashed_password = bcrypt.generate_password_hash(password).decode()
-    db.session.add(User(username=username, password=hashed_password))
-    db.session.commit()
 
-    return "", 201  # 201 - CREATED
+    try:
+        db.session.add(User(username=username, password=hashed_password))
+        db.session.commit()
+        return "", 201  # 201 - CREATED
+
+    except IntegrityError:
+        return {"error": "username has already been taken!"}, 409  # 409 - CONFLICT
 
 
 @accounts.delete("/userdel")
