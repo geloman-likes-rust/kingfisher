@@ -47,13 +47,13 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.3'
-          memory: 256M
+          cpus: '0.4'
+          memory: 448M
 
   redis:
     container_name: redis
     image: redis:alpine3.19
-    command: ["redis-server", "--maxmemory", "50mb", "--maxmemory-policy", "volatile-lru"]
+    command: ["redis-server", "--maxmemory", "64mb", "--maxmemory-policy", "volatile-lru"]
     ports:
       - 6379:6379
     networks:
@@ -67,5 +67,5 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.2'
-          memory: 256M
+          cpus: '0.1'
+          memory: 64M
