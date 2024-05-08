@@ -20,6 +20,11 @@ services:
       - JWT_SECRET=${JWT_SECRET:-""}
       - ALLOWED_ORIGIN=${ALLOWED_ORIGIN:-""}
       - FLASK_SQLALCHEMY_DATABASE_URI=${FLASK_SQLALCHEMY_DATABASE_URI:-""}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   postgres:
     container_name: postgres
@@ -39,6 +44,11 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-""}
       - POSTGRES_USER=${POSTGRES_USER:-""}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-""}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
 
   redis:
     container_name: redis
@@ -54,3 +64,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 256M
