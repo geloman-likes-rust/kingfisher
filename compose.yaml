@@ -6,6 +6,11 @@ services:
   flask:
     container_name: flask
     build: .
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
     ports:
       - 8000:8000
     networks:
@@ -17,18 +22,21 @@ services:
       redis:
         condition: service_healthy
     environment:
+      - PGHOST=${PGHOST:-""}
+      - PGUSER=${PGUSER:-""}
+      - PGPASSWORD=${PGPASSWORD:-""}
+      - PGDATABASE=${PGDATABASE:-""}
       - JWT_SECRET=${JWT_SECRET:-""}
       - ALLOWED_ORIGIN=${ALLOWED_ORIGIN:-""}
-      - FLASK_SQLALCHEMY_DATABASE_URI=${FLASK_SQLALCHEMY_DATABASE_URI:-""}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
 
   postgres:
     container_name: postgres
     image: postgres:15-alpine
+    deploy:
+      resources:
+        limits:
+          cpus: '0.4'
+          memory: 448M
     ports:
       - 5432:5432
     networks:
@@ -44,16 +52,16 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-""}
       - POSTGRES_USER=${POSTGRES_USER:-""}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-""}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.4'
-          memory: 448M
 
   redis:
     container_name: redis
     image: redis:alpine3.19
     command: ["redis-server", "--maxmemory", "64mb", "--maxmemory-policy", "volatile-lru"]
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
     ports:
       - 6379:6379
     networks:
@@ -64,8 +72,3 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    deploy:
-      resources:
-        limits:
-          cpus: '0.1'
-          memory: 64M
