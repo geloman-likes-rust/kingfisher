@@ -28,6 +28,9 @@ services:
       - PGDATABASE=${PGDATABASE:-""}
       - JWT_SECRET=${JWT_SECRET:-""}
       - ALLOWED_ORIGIN=${ALLOWED_ORIGIN:-""}
+      - REDIS_HOST=${REDIS_HOST:-""}
+      - REDIS_USER=${REDIS_USER:-""}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-""}
 
   postgres:
     container_name: postgres
