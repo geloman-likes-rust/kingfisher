@@ -11,3 +11,6 @@ redis_password = getenv("REDIS_PASSWORD")
 
 jwt_secret = getenv("JWT_SECRET")
 allowed_origin = getenv("ALLOWED_ORIGIN")
+
+super_admin_username = getenv("SUPER_ADMIN_USERNAME")
+super_admin_password = getenv("SUPER_ADMIN_PASSWORD")

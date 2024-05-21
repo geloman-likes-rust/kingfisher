@@ -31,6 +31,8 @@ services:
       - REDIS_HOST=${REDIS_HOST:-""}
       - REDIS_USER=${REDIS_USER:-""}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-""}
+      - SUPER_ADMIN_USERNAME=${SUPER_ADMIN_USERNAME:-""}
+      - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD:-""}
 
   postgres:
     container_name: postgres
