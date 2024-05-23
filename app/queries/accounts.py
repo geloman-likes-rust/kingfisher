@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import Any, Dict, List, Tuple
+from typing import Dict, List, Tuple
 from app.extensions.hasher import bcrypt
 from psycopg2 import IntegrityError, Error
 from app.shared.database import get_connection, release_connection
@@ -74,7 +74,7 @@ def get_accounts() -> List[Dict[str, str]] | None:
         return None
 
 
-def get_account(username: str) -> Dict[str, Any] | None:
+def get_account(username: str) -> Dict[str, str] | None:
     try:
         connection = get_connection()
         cursor = connection.cursor()
