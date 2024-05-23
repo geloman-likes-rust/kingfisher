@@ -12,4 +12,5 @@ def on_load(state):
         max_age=300,
         origins=allowed_origin or "http://localhost:5173",
         supports_credentials=True,
+        expose_headers=["Authorization"],
     )
