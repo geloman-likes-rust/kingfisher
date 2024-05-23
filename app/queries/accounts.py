@@ -1,3 +1,4 @@
+from typing import Dict, List, Tuple
 from app.extensions.hasher import bcrypt
 from psycopg2 import IntegrityError, Error
 from app.shared.database import get_connection, release_connection
@@ -41,3 +42,32 @@ def create_super_admin():
 
     except Error as e:
         print("Error from create_super_admin:", e)
+
+
+def get_accounts() -> List[Dict[str, str]] | None:
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+        try:
+            query = """
+                SELECT
+                    username,
+                    role,
+                    permission
+                FROM accounts
+            """
+            cursor.execute(query)
+
+            accounts: List[Tuple[str, str, str]] = cursor.fetchall()
+            if not accounts:
+                return []
+
+            return [
+                {"username": username, "role": role, "permission": permission}
+                for username, role, permission in accounts
+            ]
+        finally:
+            cursor.close()
+            release_connection(connection)
+    except:
+        return None
