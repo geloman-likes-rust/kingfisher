@@ -1,6 +1,6 @@
-from os import getenv
 from flask import Blueprint
 from flask_cors import CORS
+from app.shared.environments import allowed_origin
 
 cors = Blueprint("cors", __name__)
 
@@ -10,6 +10,6 @@ def on_load(state):
     CORS(
         state.app,
         max_age=300,
-        origins=getenv("ALLOWED_ORIGIN") or "http://localhost:5173",
+        origins=allowed_origin or "http://localhost:5173",
         supports_credentials=True,
     )
