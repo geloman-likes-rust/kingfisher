@@ -3,7 +3,7 @@ from app.extensions.cors import cors
 from app.extensions.hasher import hasher
 from app.routes.accounts import accounts
 from app.routes.authentication import authentication
-from app.queries.accounts import create_super_admin
+from app.queries.create_super_admin import create_super_admin
 
 app = Flask(__name__)
 
