@@ -2,15 +2,19 @@ from typing import List
 from app.shared.database import get_connection, release_connection
 
 
-def get_companies() -> List[str] | None:
+def get_companies(limit: int = 10, offset: int = 0) -> List[str] | None:
     try:
         connection = get_connection()
         cursor = connection.cursor()
         try:
             query = """
-                SELECT name FROM companies
+                SELECT name
+                FROM companies
+                ORDER BY id
+                LIMIT %s
+                OFFSET %s
             """
-            cursor.execute(query)
+            cursor.execute(query, (limit, offset))
             companies = cursor.fetchall()
             match companies:
                 case []:
