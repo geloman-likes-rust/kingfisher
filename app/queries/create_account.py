@@ -1,15 +1,34 @@
+from typing import Literal
+from psycopg2 import Error, IntegrityError
 from app.shared.database import get_connection, release_connection
 
 
 def create_account(
-    username: str, password: str, role="user", permission="read-only"
-) -> bool:
+    username: str | None = None,
+    password: str | None = None,
+    role="user",
+    permission="read-only",
+) -> Literal[
+    "NoUsername",
+    "NoPassword",
+    "InvalidRole",
+    "InvalidPermission",
+    "Success",
+    "AccountExists",
+    "DatabaseUnavailable",
+]:
 
-    valid_role: bool = role in ("user", "admin")
-    valid_permission: bool = permission in ("read-only", "read-write")
+    if not username:
+        return "NoUsername"
 
-    if not valid_role or not valid_permission:
-        return False
+    if not password:
+        return "NoPassword"
+
+    if role not in ("user", "admin"):
+        return "InvalidRole"
+
+    if permission not in ("read-only", "read-write"):
+        return "InvalidPermission"
 
     try:
         connection = get_connection()
@@ -23,10 +42,14 @@ def create_account(
             """
             cursor.execute(query, (username, password, role, permission))
             connection.commit()
-            return True
+            return "Success"
+
+        except IntegrityError:
+            return "AccountExists"
 
         finally:
             cursor.close()
             release_connection(connection)
-    except:
-        return False
+
+    except Error:
+        return "DatabaseUnavailable"
