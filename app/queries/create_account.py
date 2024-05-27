@@ -1,5 +1,6 @@
 from typing import Literal
 from psycopg2 import Error, IntegrityError
+from app.extensions.hasher import bcrypt
 from app.shared.database import get_connection, release_connection
 
 
@@ -40,7 +41,8 @@ def create_account(
                 VALUES
                     (%s, %s, %s, %s)
             """
-            cursor.execute(query, (username, password, role, permission))
+            hashed_password = bcrypt.generate_password_hash(password).decode()
+            cursor.execute(query, (username, hashed_password, role, permission))
             connection.commit()
             return "Success"
 
