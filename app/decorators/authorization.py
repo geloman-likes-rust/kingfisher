@@ -1,3 +1,4 @@
+from functools import wraps
 from http import HTTPStatus
 from flask import Response, request
 from typing import Any, Dict, Callable
@@ -6,8 +7,8 @@ from jwt import decode, ExpiredSignatureError, InvalidTokenError
 
 
 def jwt_required(route: Callable[..., Response]) -> Callable[..., Response]:
-
-    def validate_token(*args, **kwargs) -> Response:
+    @wraps(route)
+    def validate_token(*args: Any, **kwargs: Any) -> Response:
 
         if jwt_secret is None:
             return Response(status=HTTPStatus.INTERNAL_SERVER_ERROR)
@@ -22,20 +23,16 @@ def jwt_required(route: Callable[..., Response]) -> Callable[..., Response]:
             jwt_payload = decode(access_token, jwt_secret, algorithms=["HS256"])
             return route(jwt_payload, *args, **kwargs)
 
-        # ACCESS TOKEN HAS EXPIRED
-        except ExpiredSignatureError:
-            return Response(status=HTTPStatus.UNAUTHORIZED)
-
-        # INVALID ACCESS TOKEN
-        except InvalidTokenError:
+        # ACCESS TOKEN HAS EXPIRED OR INVALID JWT TOKEN
+        except (ExpiredSignatureError, InvalidTokenError):
             return Response(status=HTTPStatus.UNAUTHORIZED)
 
     return validate_token
 
 
 def admin_required(route: Callable[..., Response]) -> Callable[..., Response]:
-
-    def check_role(jwt_payload: Dict[str, Any], *args, **kwargs) -> Response:
+    @wraps(route)
+    def check_role(jwt_payload: Dict[str, Any], *args: Any, **kwargs: Any) -> Response:
 
         role = jwt_payload["role"]
 
@@ -45,3 +42,19 @@ def admin_required(route: Callable[..., Response]) -> Callable[..., Response]:
         return Response(status=HTTPStatus.UNAUTHORIZED)
 
     return check_role
+
+
+def write_access_required(route):
+    @wraps(route)
+    def check_permission(
+        jwt_payload: Dict[str, Any], *args: Any, **kwargs: Any
+    ) -> Response:
+
+        permission: str = jwt_payload["permission"]
+        if permission == "read-write":
+
+            return route(*args, **kwargs)
+
+        return Response(status=HTTPStatus.UNAUTHORIZED)
+
+    return check_permission
