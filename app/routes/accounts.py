@@ -1,73 +1,96 @@
-from app.shared.orm import db
-from app.shared.hasher import bcrypt
-from flask import Blueprint, request
-from sqlalchemy.exc import IntegrityError
-
-from app.models.user import User
-
+from typing import Dict
+from http import HTTPStatus
+from flask import Blueprint, Response, request
+from app.decorators.authorization import jwt_required, admin_required
 
 accounts = Blueprint("accounts", __name__, url_prefix="/api/v1")
 
 
 @accounts.post("/useradd")
-def create_user():
-    payload = request.json
-    if payload is None:
-        return "", 400  # 400 - BAD REQUEST
+@jwt_required
+@admin_required
+def create_account():
+    from app.queries.create_account import create_account
+
+    payload: Dict[str, str] | None = request.json
+
+    if not payload:
+        return Response(status=HTTPStatus.BAD_REQUEST)
 
     username = payload.get("username")
     password = payload.get("password")
-    if username is None or password is None:
-        return "", 400  # 400 - BAD REQUEST
+    role = payload.get("role") or "user"
+    permission = payload.get("permission") or "read-only"
 
-    hashed_password = bcrypt.generate_password_hash(password).decode()
+    match create_account(username, password, role, permission):
+        case "Success":
+            return Response(status=HTTPStatus.CREATED)
 
-    try:
-        db.session.add(User(username=username, password=hashed_password))
-        db.session.commit()
-        return "", 201  # 201 - CREATED
+        case "NoUsername" | "NoPassword" | "InvalidRole" | "InvalidPermission":
+            return Response(status=HTTPStatus.BAD_REQUEST)
 
-    except IntegrityError:
-        return {"error": "username has already been taken!"}, 409  # 409 - CONFLICT
+        case "AccountExists":
+            return Response(status=HTTPStatus.CONFLICT)
+
+        case "DatabaseUnavailable":
+            return Response(status=HTTPStatus.SERVICE_UNAVAILABLE)
 
 
 @accounts.delete("/userdel")
-def delete_user():
-    payload = request.json
-    if payload is None:
-        return "", 400  # 400 - BAD REQUEST
+@jwt_required
+@admin_required
+def delete_account():
+    from app.queries.delete_account import delete_account
+
+    payload: Dict[str, str] | None = request.json
+    if not payload:
+        return Response(status=HTTPStatus.BAD_REQUEST)
 
     username = payload.get("username")
-    if username is None:
-        return "", 400  # 400 - BAD REQUEST
 
-    user = User.query.filter_by(username=username).first()
-    user_not_found = user is None
-    if user_not_found:
-        return "", 404  # 404 - NOT FOUND
+    match delete_account(username):
+        case "Success":
+            return Response(status=HTTPStatus.NO_CONTENT)
 
-    db.session.delete(user)
-    db.session.commit()
-    return "", 204  # 204 - NO CONTENT
+        case "Failed":
+            return Response(status=HTTPStatus.NOT_FOUND)
+
+        case "NoUsername":
+            return Response(status=HTTPStatus.BAD_REQUEST)
+
+        case "DatabaseUnavailable":
+            return Response(status=HTTPStatus.SERVICE_UNAVAILABLE)
+
+
+@accounts.put("/usermod")
+@jwt_required
+@admin_required
+def edit_account():
+    return Response()
 
 
 @accounts.patch("/passwd")
-def change_password():
-    payload = request.json
-    if payload is None:
-        return "", 400  # 400 - BAD REQUEST
+@jwt_required
+def change_password(_):
+    from app.queries.change_password import change_password
+
+    payload: Dict[str, str] | None = request.json
+    if not payload:
+        return Response(status=HTTPStatus.BAD_REQUEST)
 
     username = payload.get("username")
-    password = payload.get("password")
-    if username is None or password is None:
-        return "", 400  # 400 - BAD REQUEST
+    oldpass = payload.get("oldpass")
+    newpass = payload.get("newpass")
 
-    user = User.query.filter_by(username=username).first()
-    user_not_found = user is None
-    if user_not_found:
-        return "", 404  # 404 - NOT FOUND
+    if not username or not oldpass or not newpass:
+        return Response(status=HTTPStatus.BAD_REQUEST)
 
-    user.password = bcrypt.generate_password_hash(password).decode()
-    db.session.commit()
+    match change_password(username, oldpass, newpass):
+        case "Success":
+            return Response(status=HTTPStatus.NO_CONTENT)
 
-    return "", 204  # 204 - NO CONTENT
+        case "Failed" | "AccountNotFound" | "PasswordDontMatch":
+            return Response(status=HTTPStatus.UNAUTHORIZED)
+
+        case "DatabaseUnavailable":
+            return Response(status=HTTPStatus.SERVICE_UNAVAILABLE)
