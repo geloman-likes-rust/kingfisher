@@ -5,7 +5,7 @@ pg_user = getenv("PGUSER")
 pg_password = getenv("PGPASSWORD")
 pg_database = getenv("PGDATABASE")
 
-redis_host = getenv("REDIS_HOST")
+redis_host = getenv("REDIS_HOST") or "localhost"
 redis_user = getenv("REDIS_USER")
 redis_password = getenv("REDIS_PASSWORD")
 
