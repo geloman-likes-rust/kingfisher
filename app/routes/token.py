@@ -54,7 +54,7 @@ def refresh_token():
                                     return Response(status=HTTPStatus.UNAUTHORIZED)
 
                             case None:
-                                return Response()
+                                return Response(status=HTTPStatus.UNAUTHORIZED)
                     case None:
                         return Response(status=HTTPStatus.UNAUTHORIZED)
 
