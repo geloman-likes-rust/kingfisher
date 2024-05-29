@@ -28,36 +28,44 @@ def send_jwt(payload: Dict[str, str]) -> Response:
             return Response(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
-def create_refresh_token(username: str, role="user", permission="read-only"):
+def create_refresh_token(
+    username: str, role="user", permission="read-only"
+) -> str | None:
 
-    current_time = datetime.now(UTC)
-    token_expiration = current_time + timedelta(days=1)
+    match jwt_secret:
+        case str():
 
-    jwt_id = str(uuid4())
+            current_time = datetime.now(UTC)
+            token_expiration = current_time + timedelta(days=1)
 
-    refresh_token = encode(
-        payload={
-            "jti": jwt_id,
-            "exp": token_expiration,
-            "username": username,
-            "permission": permission,
-            "role": role,
-        },
-        key=jwt_secret,
-        algorithm="HS256",
-    )
+            jwt_id = str(uuid4())
 
-    token_expiration_in_seconds = int(
-        token_expiration.timestamp() - current_time.timestamp()
-    )
+            refresh_token = encode(
+                payload={
+                    "jti": jwt_id,
+                    "exp": token_expiration,
+                    "username": username,
+                    "permission": permission,
+                    "role": role,
+                },
+                key=jwt_secret,
+                algorithm="HS256",
+            )
 
-    redis_client.setex(
-        name=f"login-session:{username}:{jwt_id}",
-        value=refresh_token,
-        time=token_expiration_in_seconds,
-    )
+            token_expiration_in_seconds = int(
+                token_expiration.timestamp() - current_time.timestamp()
+            )
 
-    return refresh_token
+            redis_client.setex(
+                name=f"login-session:{username}:{jwt_id}",
+                value=refresh_token,
+                time=token_expiration_in_seconds,
+            )
+
+            return refresh_token
+
+        case None:
+            return None
 
 
 def revoke_refresh_token(token_id: str, username: str):
