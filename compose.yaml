@@ -47,6 +47,8 @@ services:
     networks:
       - kingfisher
     restart: on-failure
+    volumes:
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
     healthcheck:
       test: ["CMD", "/usr/local/bin/pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
       interval: 5s
