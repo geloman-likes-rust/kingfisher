@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from flask import Blueprint, Response, jsonify
+from app.decorators.authorization import jwt_required
 
 
 parent_companies = Blueprint(
@@ -8,7 +9,8 @@ parent_companies = Blueprint(
 
 
 @parent_companies.get("/<company>/parent-companies")
-def get_parent_companies(company: str):
+@jwt_required
+def get_parent_companies(_, company: str):
     from app.queries.get_parent_companies import get_parent_companies
 
     company = company.replace("%20", " ").replace("+", " ")
