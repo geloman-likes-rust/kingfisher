@@ -71,6 +71,15 @@ def revoke_refresh_token(token_id: str, username: str):
             return False
 
 
+def verify_refresh_token(token_id: str, username: str):
+    exists = redis_client.get(f"login-session:{username}:{token_id}")
+    match exists:
+        case str():
+            return True
+        case None | _:
+            return False
+
+
 def revoke_refresh_tokens(username: str) -> bool:
     sessions = redis_client.keys(f"login-session:{username}:*")
     match sessions:
