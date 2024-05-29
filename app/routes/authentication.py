@@ -1,4 +1,4 @@
-from jwt import decode
+from jwt import decode, ExpiredSignatureError, InvalidTokenError
 from typing import Dict
 from http import HTTPStatus
 from app.shared.hasher import bcrypt
@@ -62,18 +62,23 @@ def logout(_):
             refresh_token: str | None = payload.get("refresh_token")
             match refresh_token:
                 case str():
-                    jwt_payload = decode(
-                        jwt=refresh_token, key=jwt_secret, algorithms=["HS256"]
-                    )
+                    try:
+                        jwt_payload = decode(
+                            jwt=refresh_token, key=jwt_secret, algorithms=["HS256"]
+                        )
 
-                    token_id: str = jwt_payload["jti"]
-                    username: str = jwt_payload["username"]
+                        token_id: str = jwt_payload["jti"]
+                        username: str = jwt_payload["username"]
 
-                    match revoke_refresh_token(token_id, username):
-                        case True:
-                            return Response(status=HTTPStatus.NO_CONTENT)
-                        case False:
-                            return Response(status=HTTPStatus.NOT_FOUND)
+                        match revoke_refresh_token(token_id, username):
+                            case True:
+                                return Response(status=HTTPStatus.NO_CONTENT)
+                            case False:
+                                return Response(status=HTTPStatus.NOT_FOUND)
+
+                    except (ExpiredSignatureError, InvalidTokenError):
+                        return Response(status=HTTPStatus.UNAUTHORIZED)
+
                 case None:
                     return Response(status=HTTPStatus.BAD_REQUEST)
         case None:
