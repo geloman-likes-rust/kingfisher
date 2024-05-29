@@ -2,11 +2,33 @@ from typing import Any, Dict
 from http import HTTPStatus
 from flask import Blueprint, Response, request
 from app.shared.environments import jwt_secret
-from app.shared.credential import send_jwt, verify_refresh_token
 from jwt import decode, ExpiredSignatureError, InvalidTokenError
+from app.decorators.authorization import admin_required, jwt_required
+from app.shared.credential import send_jwt, verify_refresh_token, revoke_refresh_tokens
 
 
 token = Blueprint("token", __name__, url_prefix="/api/v1/token")
+
+
+@token.post("/revoke")
+@jwt_required
+@admin_required
+def revoke_token():
+    payload: Dict[str, str] | None = request.json
+    match payload:
+        case dict():
+            username = payload.get("username")
+            match username:
+                case str():
+                    match revoke_refresh_tokens(username):
+                        case True:
+                            return Response(status=HTTPStatus.NO_CONTENT)
+                        case False:
+                            return Response(status=HTTPStatus.NOT_FOUND)
+                case None:
+                    return Response(status=HTTPStatus.BAD_REQUEST)
+        case None:
+            return Response(status=HTTPStatus.BAD_REQUEST)
 
 
 @token.post("/refresh")
