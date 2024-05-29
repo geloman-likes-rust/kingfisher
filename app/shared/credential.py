@@ -80,10 +80,10 @@ def revoke_refresh_token(token_id: str, username: str):
 
 
 def verify_refresh_token(token_id: str, username: str):
-    exists = redis_client.get(f"login-session:{username}:{token_id}")
-    match exists:
-        case str():
+    match redis_client.get(f"login-session:{username}:{token_id}"):
+        case bytes() | str():
             return True
+
         case None | _:
             return False
 
