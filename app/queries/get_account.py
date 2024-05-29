@@ -25,13 +25,16 @@ def get_account(username: str) -> Dict[str, str] | None:
             User = namedtuple(
                 "User", field_names=["username", "password", "role", "permission"]
             )
+
             user = User(*account)
+
             return {
                 "username": user.username,
                 "password": user.password,
                 "role": user.role,
                 "permission": user.permission,
             }
+
         finally:
             cursor.close()
             release_connection(connection)
