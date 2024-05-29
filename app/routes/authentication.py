@@ -56,7 +56,7 @@ def login():
             return Response(status=HTTPStatus.UNAUTHORIZED)
 
 
-@authentication.get("/logout")
+@authentication.post("/logout")
 @jwt_required
 def logout(_):
     payload: Dict[str, str] | None = request.json
