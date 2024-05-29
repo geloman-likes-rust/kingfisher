@@ -1,4 +1,3 @@
-from jwt import decode, ExpiredSignatureError, InvalidTokenError
 from typing import Dict
 from http import HTTPStatus
 from app.shared.hasher import bcrypt
@@ -6,6 +5,7 @@ from flask import Blueprint, Response, request
 from app.shared.environments import jwt_secret
 from app.queries.get_account import get_account
 from app.decorators.authorization import jwt_required
+from jwt import decode, ExpiredSignatureError, InvalidTokenError
 from app.shared.credential import send_jwt, revoke_refresh_token, create_refresh_token
 
 
@@ -36,15 +36,18 @@ def login():
                     permission = account["permission"]
 
                     refresh_token = create_refresh_token(username, role, permission)
-
-                    return send_jwt(
-                        {
-                            "username": username,
-                            "role": role,
-                            "permission": permission,
-                            "refresh_token": refresh_token,
-                        }
-                    )
+                    match refresh_token:
+                        case str():
+                            return send_jwt(
+                                {
+                                    "username": username,
+                                    "role": role,
+                                    "permission": permission,
+                                    "refresh_token": refresh_token,
+                                }
+                            )
+                        case None:
+                            return Response(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
                 case False:
                     return Response(status=HTTPStatus.UNAUTHORIZED)
