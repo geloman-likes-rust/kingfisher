@@ -1,8 +1,8 @@
-from http import HTTPStatus
 from typing import Dict
+from http import HTTPStatus
 from flask import Blueprint, Response, request
-from app.shared.credential import send_jwt
 from app.shared.environments import jwt_secret
+from app.shared.credential import send_jwt, verify_refresh_token
 from jwt import decode, ExpiredSignatureError, InvalidTokenError
 
 
@@ -43,12 +43,26 @@ def refresh_token():
                                         refresh_token, jwt_secret, algorithms=["HS256"]
                                     )
 
-                                    payload = {
-                                        "username": jwt_payload["username"],
-                                        "permission": jwt_payload["permission"],
-                                        "role": jwt_payload["role"],
-                                    }
-                                    return send_jwt(payload)
+                                    jwt_id = jwt_payload["jti"]
+                                    username = jwt_payload["username"]
+
+                                    match verify_refresh_token(jwt_id, username):
+                                        case True:
+                                            role = jwt_payload["role"]
+                                            permission = jwt_payload["permission"]
+
+                                            payload = {
+                                                "username": username,
+                                                "permission": permission,
+                                                "role": role,
+                                            }
+
+                                            return send_jwt(payload)
+
+                                        case False:
+                                            return Response(
+                                                status=HTTPStatus.UNAUTHORIZED
+                                            )
 
                                 except (ExpiredSignatureError, InvalidTokenError):
                                     return Response(status=HTTPStatus.UNAUTHORIZED)
