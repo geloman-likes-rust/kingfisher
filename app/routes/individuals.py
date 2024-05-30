@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from flask import Blueprint, Response, jsonify
 from app.decorators.authorization import jwt_required
+from app.shared.cache import get_cache, cache_response
 
 
 individuals = Blueprint("individuals", __name__, url_prefix="/api/v1/companies")
@@ -13,9 +14,19 @@ def get_individuals(_, company: str):
 
     company = company.replace("%20", " ").replace("+", " ")
 
-    individuals = get_individuals(company)
-    match individuals:
-        case list():
-            return jsonify(individuals)
+    endpoint = f"/companies/{company}/individuals"
+    cached = get_cache(endpoint)
+    match cached:
+        # CACHE HIT
+        case list() | dict():
+            return jsonify(cached)
+
+        # CACHE MISS
         case None:
-            return Response(status=HTTPStatus.NOT_FOUND)
+            individuals = get_individuals(company)
+            match individuals:
+                case list():
+                    cache_response(endpoint, individuals)
+                    return jsonify(individuals)
+                case None:
+                    return Response(status=HTTPStatus.NOT_FOUND)
