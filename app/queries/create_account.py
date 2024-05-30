@@ -31,6 +31,9 @@ def create_account(
     if permission not in ("read-only", "read-write"):
         return "InvalidPermission"
 
+    if role == "admin":
+        permission = "read-write"
+
     try:
         connection = get_connection()
         cursor = connection.cursor()
