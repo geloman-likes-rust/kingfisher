@@ -16,11 +16,25 @@ def get_cache(
 
 
 def cache_response(
-    endpoint: str, response: Dict[str, Any] | List[Dict[str, Any]] | List[str]
+    endpoint: str,
+    response: Dict[str, Any] | List[Dict[str, Any]] | List[str],
+    ttl: int = 300,
 ) -> None:
-    five_minutes = 60 * 5
+    """
+    Cache the `response` from the specified `endpoint` for a certain `time` period in seconds.
+
+    Parameters:
+
+        endpoint (`str`): The `endpoint` from which the `response` is obtained.
+        response (`dict` or `list`): The `response` obtained from the `endpoint`.
+        ttl (`int`, `optional`): Defaults to `300 seconds` (5 minutes).
+
+    Returns:
+        `None`
+    """
+
     serilized = json.dumps(response)
-    redis_client.setex(name=endpoint, value=serilized, time=five_minutes)
+    redis_client.setex(name=endpoint, value=serilized, time=ttl)
 
 
 def delete_cache(endpoint: str) -> None:
