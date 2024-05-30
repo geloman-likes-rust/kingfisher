@@ -1,6 +1,7 @@
 from typing import Dict
 from http import HTTPStatus
 from flask import Blueprint, Response, request
+from app.shared.cache import cache_response, delete_cache, get_cache
 from app.decorators.authorization import jwt_required, admin_required
 
 accounts = Blueprint("accounts", __name__, url_prefix="/api/v1")
@@ -22,18 +23,27 @@ def create_account():
     role = payload.get("role") or "user"
     permission = payload.get("permission") or "read-only"
 
-    match create_account(username, password, role, permission):
-        case "Success":
-            return Response(status=HTTPStatus.CREATED)
-
-        case "NoUsername" | "NoPassword" | "InvalidRole" | "InvalidPermission":
-            return Response(status=HTTPStatus.BAD_REQUEST)
-
-        case "AccountExists":
+    endpoint = f"/useradd?username={username}"
+    match get_cache(endpoint):
+        # CACHE HIT
+        case list() | dict():
             return Response(status=HTTPStatus.CONFLICT)
 
-        case "DatabaseUnavailable":
-            return Response(status=HTTPStatus.SERVICE_UNAVAILABLE)
+        # CACHE MISS
+        case None:
+            match create_account(username, password, role, permission):
+                case "Success":
+                    cache_response(endpoint, {})
+                    return Response(status=HTTPStatus.CREATED)
+
+                case "NoUsername" | "NoPassword" | "InvalidRole" | "InvalidPermission":
+                    return Response(status=HTTPStatus.BAD_REQUEST)
+
+                case "AccountExists":
+                    return Response(status=HTTPStatus.CONFLICT)
+
+                case "DatabaseUnavailable":
+                    return Response(status=HTTPStatus.SERVICE_UNAVAILABLE)
 
 
 @accounts.delete("/userdel")
@@ -50,6 +60,7 @@ def delete_account():
 
     match delete_account(username):
         case "Success":
+            delete_cache(f"/useradd?username={username}")
             return Response(status=HTTPStatus.NO_CONTENT)
 
         case "Failed":
