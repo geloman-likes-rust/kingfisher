@@ -39,7 +39,7 @@ def admin_required(route: Callable[..., Response]) -> Callable[..., Response]:
         if role == "admin":
             return route(*args, **kwargs)
 
-        return Response(status=HTTPStatus.UNAUTHORIZED)
+        return Response(status=HTTPStatus.FORBIDDEN)
 
     return check_role
 
@@ -55,6 +55,6 @@ def write_access_required(route):
 
             return route(*args, **kwargs)
 
-        return Response(status=HTTPStatus.UNAUTHORIZED)
+        return Response(status=HTTPStatus.FORBIDDEN)
 
     return check_permission
