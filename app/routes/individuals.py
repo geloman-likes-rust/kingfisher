@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import Dict, List
-from app.shared.cache import get_cache, cache_response
 from flask import Blueprint, Response, jsonify, request
+from app.shared.cache import delete_cache, get_cache, cache_response
 from app.decorators.authorization import jwt_required, write_access_required
 
 
@@ -49,6 +49,7 @@ def create_individuals(company: str):
         case list():
             match create_individuals(company, individuals):
                 case "Success":
+                    delete_cache(f"/companies/{company}/individuals")
                     return Response(status=HTTPStatus.NO_CONTENT)
 
                 case "NotUnique":
@@ -87,7 +88,9 @@ def delete_individual(company: str):
 
                     match delete_individual(firstname, lastname, position, company):
                         case True:
+                            delete_cache(f"/companies/{company}/individuals")
                             return Response(status=HTTPStatus.NO_CONTENT)
+
                         case False:
                             return Response(status=HTTPStatus.NOT_FOUND)
 
