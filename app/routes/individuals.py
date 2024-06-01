@@ -50,7 +50,7 @@ def create_individuals(company: str):
             match create_individuals(company, individuals):
                 case "Success":
                     delete_cache(f"/companies/{company}/individuals")
-                    return Response(status=HTTPStatus.NO_CONTENT)
+                    return Response(status=HTTPStatus.CREATED)
 
                 case "NotUnique":
                     return Response(status=HTTPStatus.CONFLICT)
