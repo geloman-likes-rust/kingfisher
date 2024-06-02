@@ -1,6 +1,3 @@
-from time import sleep
-from typing import Tuple, Callable
-from psycopg2 import OperationalError
 from psycopg2.pool import SimpleConnectionPool
 from app.shared.environments import pg_host, pg_user, pg_password, pg_database
 
