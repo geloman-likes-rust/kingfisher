@@ -50,6 +50,7 @@ def create_individuals(company: str):
             match create_individuals(company, individuals):
                 case "Success":
                     delete_cache(f"/companies/{company}/individuals")
+                    delete_cache(f"/companies/{company}/related-individuals")
                     return Response(status=HTTPStatus.CREATED)
 
                 case "NotUnique":
@@ -89,6 +90,7 @@ def delete_individual(company: str):
                     match delete_individual(firstname, lastname, position, company):
                         case True:
                             delete_cache(f"/companies/{company}/individuals")
+                            delete_cache(f"/companies/{company}/related-individuals")
                             return Response(status=HTTPStatus.NO_CONTENT)
 
                         case False:

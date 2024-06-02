@@ -51,7 +51,10 @@ def create_company():
                 case str():
                     match create_company(company):
                         case "Success":
-                            delete_cache(endpoint="/companies?*")
+                            delete_cache("/companies?*")
+                            delete_cache(f"/companies/{company}/individuals")
+                            delete_cache(f"/companies/{company}/parent-companies")
+                            delete_cache(f"/companies/{company}/related-individuals")
                             return Response(status=HTTPStatus.CREATED)
 
                         case "CompanyExists":
@@ -77,8 +80,12 @@ def delete_company():
                 case str():
                     match delete_company(company):
                         case True:
-                            delete_cache(endpoint="/companies?*")
+                            delete_cache("/companies?*")
+                            delete_cache(f"/companies/{company}/individuals")
+                            delete_cache(f"/companies/{company}/parent-companies")
+                            delete_cache(f"/companies/{company}/related-individuals")
                             return Response(status=HTTPStatus.NO_CONTENT)
+
                         case False:
                             return Response(status=HTTPStatus.NOT_FOUND)
                 case None:
@@ -102,7 +109,11 @@ def update_company_name():
             match change_company_name(old_name, new_name):
                 case True:
                     delete_cache(endpoint="/companies?*")
+                    delete_cache(endpoint=f"/companies/{old_name}/individuals")
+                    delete_cache(endpoint=f"/companies/{old_name}/parent-companies")
+                    delete_cache(endpoint=f"/companies/{old_name}/related-individuals")
                     return Response(status=HTTPStatus.NO_CONTENT)
+
                 case False:
                     return Response(status=HTTPStatus.NOT_FOUND)
 
