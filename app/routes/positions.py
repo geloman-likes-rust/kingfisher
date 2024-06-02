@@ -2,6 +2,7 @@ from typing import Dict
 from http import HTTPStatus
 from flask import Blueprint, Response, jsonify, request
 from app.shared.cache import cache_response, delete_cache, get_cache
+from app.shared.limiter import limiter
 
 
 positions = Blueprint("positions", __name__, url_prefix="/api/v1")
@@ -30,6 +31,7 @@ def get_positions():
 
 
 @positions.post("/positions")
+@limiter.limit("50/day;25/hour")
 def create_position():
     from app.queries.create_position import create_position
 
