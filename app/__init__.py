@@ -9,6 +9,7 @@ from app.routes.positions import positions
 from app.routes.individuals import individuals
 from app.routes.authentication import authentication
 from app.routes.parent_companies import parent_companies
+from app.routes.related_individuals import related_individuals
 
 from app.queries.create_super_admin import create_super_admin
 
@@ -26,6 +27,7 @@ app.register_blueprint(positions)
 app.register_blueprint(individuals)
 app.register_blueprint(authentication)
 app.register_blueprint(parent_companies)
+app.register_blueprint(related_individuals)
 
 with app.app_context():
     create_super_admin()
