@@ -1,6 +1,7 @@
 from typing import Dict
 from http import HTTPStatus
 from app.shared.hasher import bcrypt
+from app.shared.limiter import limiter
 from flask import Blueprint, Response, request
 from app.shared.environments import jwt_secret
 from app.queries.get_account import get_account
@@ -14,6 +15,7 @@ authentication = Blueprint("authentication", __name__, url_prefix="/api/v1")
 
 
 @authentication.post("/login")
+@limiter.limit("10/day;5/hour")
 def login():
     payload: Dict[str, str] | None = request.json
     if not payload:
