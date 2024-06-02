@@ -1,6 +1,7 @@
 from flask import Flask
 from app.extensions.cors import cors
 from app.extensions.hasher import hasher
+from app.extensions.limiter import limiter
 
 from app.routes.token import token
 from app.routes.accounts import accounts
@@ -18,6 +19,7 @@ app = Flask(__name__)
 # FLASK EXTENSIONS
 app.register_blueprint(cors)
 app.register_blueprint(hasher)
+app.register_blueprint(limiter)
 
 # API ROUTES
 app.register_blueprint(token)
