@@ -71,6 +71,8 @@ def create_company():
 
 
 @companies.delete("/companies")
+@jwt_required
+@write_access_required
 def delete_company():
     from app.queries.delete_company import delete_company
 
@@ -97,6 +99,8 @@ def delete_company():
 
 
 @companies.patch("/companies")
+@jwt_required
+@write_access_required
 def update_company_name():
     from app.queries.change_company_name import change_company_name
 
