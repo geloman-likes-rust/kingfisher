@@ -33,8 +33,8 @@ def cache_response(
         `None`
     """
 
-    serilized = json.dumps(response)
-    redis_client.setex(name=endpoint, value=serilized, time=ttl)
+    serialized = json.dumps(response)
+    redis_client.setex(name=endpoint, value=serialized, time=ttl)
 
 
 def delete_cache(endpoint: str) -> None:

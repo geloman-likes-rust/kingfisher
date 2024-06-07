@@ -1,18 +1,11 @@
-from typing import List, Dict
-from app.queries.get_companies import get_companies
-from app.queries.get_positions import get_positions
+from typing import List, Dict, Literal
+from psycopg2 import Error, IntegrityError
 from app.shared.database import get_connection, release_connection
 
 
-def create_individuals(company: str, individuals: List[Dict[str, str]]) -> bool:
-    companies = get_companies()
-    positions = get_positions()
-
-    if not companies or not positions:
-        return False
-
-    if company not in companies:
-        return False
+def create_individuals(
+    company: str, individuals: List[Dict[str, str]]
+) -> Literal["Success", "NotUnique", "CompanyNotFound", "DatabaseUnavailable"]:
 
     try:
         connection = get_connection()
@@ -35,16 +28,23 @@ def create_individuals(company: str, individuals: List[Dict[str, str]]) -> bool:
                     individual["position"],
                 )
 
-                if position not in positions:
-                    return False
-
                 cursor.execute(query, (firstname, lastname, position, company))
             connection.commit()
 
-            return True
+            return "Success"
 
         finally:
             cursor.close()
             release_connection(connection)
-    except:
-        return False
+
+    except IntegrityError as e:
+        not_null_violation: bool = e.pgcode == "23502"
+        match not_null_violation:
+            case True:
+                return "CompanyNotFound"
+
+            case False:
+                return "NotUnique"
+
+    except Error:
+        return "DatabaseUnavailable"

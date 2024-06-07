@@ -21,14 +21,15 @@ CREATE TABLE individuals(
     firstname VARCHAR NOT NULL,
     lastname VARCHAR NOT NULL,
     position_id INTEGER REFERENCES positions(id) ON DELETE SET NULL,
-    company_id INTEGER REFERENCES companies(id) ON DELETE CASCADE
+    company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+    CONSTRAINT unique_individual UNIQUE (position_id, company_id, firstname, lastname)
 );
 
 CREATE TABLE parent_companies(
-    id SERIAL PRIMARY KEY,
+    relation VARCHAR NOT NULL,
     company_id INTEGER REFERENCES companies(id) ON DELETE CASCADE,
     parent_id INTEGER REFERENCES companies(id) ON DELETE CASCADE,
-    relation VARCHAR NOT NULL
+    CONSTRAINT parent_company_pk PRIMARY KEY (company_id, parent_id)
 );
 
 

@@ -3,11 +3,13 @@ from http import HTTPStatus
 from flask import Blueprint, Response, request
 from app.shared.cache import cache_response, delete_cache, get_cache
 from app.decorators.authorization import jwt_required, admin_required
+from app.shared.limiter import limiter
 
 accounts = Blueprint("accounts", __name__, url_prefix="/api/v1")
 
 
 @accounts.post("/useradd")
+@limiter.limit("10/day")
 @jwt_required
 @admin_required
 def create_account():
