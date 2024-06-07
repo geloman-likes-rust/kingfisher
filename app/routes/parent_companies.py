@@ -72,6 +72,8 @@ def create_parent_companies(company: str):
 
 
 @parent_companies.delete("/<company>/parent-companies")
+@jwt_required
+@write_access_required
 def delete_parent_company(company: str):
     from app.queries.delete_parent_company import delete_parent_company
 
