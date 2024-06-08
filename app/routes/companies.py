@@ -9,23 +9,11 @@ from app.shared.limiter import limiter
 companies = Blueprint("companies", __name__, url_prefix="/api/v1")
 
 
-@companies.get("/companies/count")
-@jwt_required
-def get_companies_count():
-    from app.queries.get_companies_count import get_companies_count
-
-    companies_count = get_companies_count()
-    match companies_count:
-        case int():
-            return jsonify({"count": companies_count})
-        case None:
-            return Response(status=HTTPStatus.NOT_FOUND)
-
-
 @companies.get("/companies")
 @jwt_required
 def get_companies(_):
     from app.queries.get_companies import get_companies
+    from app.queries.get_companies_count import get_companies_count
 
     limit: int = request.args.get("limit", type=int) or 10
     offset: int = request.args.get("offset", type=int) or 0
@@ -43,8 +31,10 @@ def get_companies(_):
             companies: List[str] | None = get_companies(limit, offset)
             match companies:
                 case list():
-                    cache_response(endpoint, response=companies)
-                    return jsonify(companies)
+                    total = get_companies_count() or 0
+                    response = {"companies": companies, "total": total}
+                    cache_response(endpoint, response)
+                    return jsonify(response)
 
                 case None:
                     return Response(status=HTTPStatus.NOT_FOUND)
