@@ -9,6 +9,19 @@ from app.shared.limiter import limiter
 companies = Blueprint("companies", __name__, url_prefix="/api/v1")
 
 
+@companies.get("/companies/count")
+@jwt_required
+def get_companies_count():
+    from app.queries.get_companies_count import get_companies_count
+
+    companies_count = get_companies_count()
+    match companies_count:
+        case int():
+            return jsonify({"count": companies_count})
+        case None:
+            return Response(status=HTTPStatus.NOT_FOUND)
+
+
 @companies.get("/companies")
 @jwt_required
 def get_companies(_):
