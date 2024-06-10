@@ -15,7 +15,7 @@ authentication = Blueprint("authentication", __name__, url_prefix="/api/v1")
 
 
 @authentication.post("/login")
-@limiter.limit("10/day;5/hour")
+# @limiter.limit("10/day;5/hour")
 def login():
     payload: Dict[str, str] | None = request.json
     if not payload:
