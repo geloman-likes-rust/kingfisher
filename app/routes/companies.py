@@ -4,7 +4,6 @@ from flask.blueprints import Blueprint
 from flask import Response, jsonify, request
 from app.shared.cache import cache_response, get_cache, delete_cache
 from app.decorators.authorization import jwt_required, write_access_required
-from app.shared.limiter import limiter
 
 companies = Blueprint("companies", __name__, url_prefix="/api/v1")
 
@@ -41,7 +40,6 @@ def get_companies(_):
 
 
 @companies.post("/companies")
-@limiter.limit("50/day;10/minute")
 @jwt_required
 @write_access_required
 def create_company():

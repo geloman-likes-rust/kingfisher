@@ -3,7 +3,6 @@ from http import HTTPStatus
 from flask import Blueprint, Response, jsonify, request
 from app.shared.cache import cache_response, delete_cache, get_cache
 from app.decorators.authorization import jwt_required, admin_required
-from app.shared.limiter import limiter
 
 
 positions = Blueprint("positions", __name__, url_prefix="/api/v1")
@@ -33,7 +32,6 @@ def get_positions(_):
 
 
 @positions.post("/positions")
-@limiter.limit("50/day;25/hour")
 @jwt_required
 @admin_required
 def create_position():
