@@ -3,7 +3,6 @@ from typing import Dict, List
 from flask import Blueprint, Response, jsonify, request
 from app.shared.cache import delete_cache, get_cache, cache_response
 from app.decorators.authorization import jwt_required, write_access_required
-from app.shared.limiter import limiter
 
 
 individuals = Blueprint("individuals", __name__, url_prefix="/api/v1/companies")
@@ -35,7 +34,6 @@ def get_individuals(_, company: str):
 
 
 @individuals.post("/<company>/individuals")
-@limiter.limit("100/day;20/hour;10/minute")
 @jwt_required
 @write_access_required
 def create_individuals(company: str):
